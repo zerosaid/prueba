@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banco Virtual</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h2>Banco Virtual de Daniel</h2>
+  </header>
+
+  <main>
+    <h1>Bienvenido al Banco Virtual</h1>
+    
+    <div id="resumen">
+      <p><strong>Número de cuenta:</strong> <span id="cuenta">---</span></p>
+      <p><strong>Saldo actual:</strong> $<span id="saldo">0</span></p>
+      <p><strong>Fecha de creación:</strong> <span id="fecha">---</span></p>
+    </div>
+
+    <div id="menu">
+      <button onclick="mostrarOpcion('consignacion')">Consignación electrónica</button>
+      <button onclick="mostrarOpcion('retiro')">Retiro</button>
+      <button onclick="mostrarOpcion('deposito')">Depósito</button>
+      <button onclick="mostrarOpcion('reporte')">Ver reporte</button>
+      <button onclick="mostrarOpcion('resumen')">Resumen de transacciones</button>
+    </div>
+
+    <div id="consignacion" class="contenido" style="display: none;">
+      <h2>Consignación Electrónica</h2>
+      <p><strong>Número de cuenta:</strong> <span id="cuentaUsuario">1234567890</span></p>
+      <p><strong>Nombre del usuario:</strong> <span id="nombreUsuario">Daniel Santiago González Hernández</span></p>
+      
+      <label for="montoConsignar">Cantidad a consignar:</label>
+      <input type="number" id="montoConsignar" min="1" required>
+      <br><br>
+      <button onclick="realizarConsignacion()">Confirmar consignación</button>
+
+      <div id="resumenConsignacion" style="margin-top: 20px; display: none;">
+        <h3>Resumen de consignación</h3>
+        <p id="detalleConsignacion"></p>
+        <button onclick="window.print()">Imprimir resumen</button>
+      </div>
+    </div>
+
+    <div class="contenido" id="contenido" style="display: none;">
+      <p>Selecciona una opción del menú para comenzar.</p>
+    </div>
+
+    <div id="resumenTransacciones" class="contenido" style="display: none;">
+      <h2>Resumen de Transacciones</h2>
+      <table id="tablaTransacciones" border="1" cellpadding="8" cellspacing="0">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Referencia</th>
+            <th>Tipo</th>
+            <th>Descripción</th>
+            <th>Valor</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpoTablaTransacciones"></tbody>
+      </table>
+      <br>
+      <button onclick="window.print()">Imprimir resumen</button>
+    </div>
+  </main>
+
+  <script src="./Dashboard.js"></script>
+</body>
+</html>
+
