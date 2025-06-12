@@ -1,5 +1,12 @@
 const transacciones = [];
 
+const toggleBtn = document.getElementById('hamburguesa');
+const menu = document.getElementById('menu');
+
+toggleBtn.addEventListener('click', () => {
+  menu.classList.toggle('mostrar');
+});
+
 document.addEventListener("DOMContentLoaded", () => {
   const usuario = sessionStorage.getItem("usuario");
   if (!usuario) {
