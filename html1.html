@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Banco Virtual</title>
+<link rel="stylesheet" href="style2.css">
+</head>
+<body>
+  <header>
+    <h2>Banco Virtual</h2>
+  </header>
+
+  <main>
+    <h1>Bienvenido</h1>
+    <p>
+      Gestiona tus finanzas de forma segura y confiable. Consulta tu saldo, realiza transferencias y más desde la comodidad de tu hogar.
+    </p>
+    <button id="btn-iniciar-sesion">Iniciar sesión</button>
+
+    <div id="window" class="window">
+      <div class="window-cont">
+        <h2>Iniciar sesión</h2>
+        <p>identificacion, numero y contraseña</p>
+        <label for="usuario">Ingrese su usuario</label><br>
+        <input type="text" id="usuario" required><br><br>
+
+        <label for="tipo">Ingrese que tipo de documento tiene</label><br>
+        <select name="tipo" id="tipo">
+          <option value="TI">tarjeta de identidad</option>
+          <option value="CC">cedula de ciudadania</option>
+          <option value="CE">cedula de extranjeria</option>
+          <option value="NIT">numero de identificacion tributaria</option>
+          <option value="RC">registro civil</option>
+        </select>
+        <br><br>
+
+        <label for="cedula">Ingrese su numero de documento de identificacion</label><br>
+        <input type="number" id="cedula" required min="1"><br><br>
+
+        <label for="contraseña">Ingrese su contraseña</label><br>
+        <input type="password" id="contraseña" required><br><br>
+
+        <button id="btn-confirmar">Iniciar sesión</button>
+        <button id="btn-cerrar">❌</button>
+        <p id="mensaje-login"></p>
+
+        <p>No tienes cuenta? <a href="#">Registrarse</a></p>
+      </div>
+    </div>
+  </main>
+
+  <script src="./inicio-de-sesion.js"></script>
+</body>
+</html>
