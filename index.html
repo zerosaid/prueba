@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Banco Virtual</title>
+  <title>Acme Banck</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="style2.css" />
 </head>
 <body>
   <header>
-    <h2>Banco Virtual de Daniel</h2>
+    <h2>ACME BANK</h2>
   </header>
 
   <main>
     <section id="inicio">
-      <h1>Bienvenido</h1>
-      <p>Gestiona tus finanzas de forma segura y confiable. Consulta tu saldo, realiza transferencias y más desde la comodidad de tu hogar.</p>
+      <h1>Bienvenido a Acme Bank</h1>
+      <p id="frase-temporada">Temporada de patos... no, temporada de conejos... ¡no! ¡Temporada de billetes en ACME Bank! Donde tus finanzas corren más rápido que el Correcaminos.</p>
       <button id="btn-iniciar-sesion">Iniciar sesión</button>
       <button id="btn-registrarse">Registrarse</button>
 
@@ -23,10 +23,10 @@
         <div class="window-cont">
           <h2>Iniciar sesión</h2>
           <p>identificacion, numero y contraseña</p>
-          <label for="usuario">Ingrese su usuario</label><br>
+          <label for="usuario">Ingrese su usuario</label>
           <input type="text" id="usuario" required><br><br>
 
-          <label for="tipo">Tipo de documento</label><br>
+          <label for="tipo">Tipo de documento</label>
           <select name="tipo" id="tipo">
             <option value="TI">tarjeta de identidad</option>
             <option value="CC">cedula de ciudadania</option>
@@ -36,13 +36,18 @@
           </select>
           <br><br>
 
-          <label for="cedula">Número de documento</label><br>
+          <label for="cedula">Número de documento</label>
           <input type="number" id="cedula" required min="1"><br><br>
 
-          <label for="contraseña">Contraseña</label><br>
-          <input type="password" id="contraseña" required><br><br>
+          <label for="contraseña">Contraseña</label>
+          <div class="input-container">
+            <input type="password" id="contraseña" required>
+            <button type="button" id="toggle-password">👁️</button>
+          </div>
+          <br>
 
           <button id="btn-confirmar">Iniciar sesión</button>
+          <br><br>
           <button id="btn-cerrar">❌</button>
           <p id="mensaje-login"></p>
 
@@ -54,7 +59,7 @@
         <div class="window-regis-cont">
           <h2>Registrarse</h2>
 
-          <label for="tipo-regis">Tipo de documento</label><br>
+          <label for="tipo-regis">Tipo de documento</label>
           <select name="tipo-regis" id="tipo-regis">
             <option value="TI">tarjeta de identidad</option>
             <option value="CC">cedula de ciudadania</option>
@@ -64,41 +69,44 @@
           </select>
           <br><br>
 
-          <label for="cedula-regis">Número de documento</label><br>
+          <label for="cedula-regis">Número de documento</label>
           <input type="number" id="cedula-regis" required min="1">
           <br><br>
 
-          <label for="usuario-regis">Nombres y apellidos</label><br>
+          <label for="usuario-regis">Nombres y apellidos</label>
           <input type="text" id="usuario-regis">
           <br><br>
 
-          <label for="genero-regis">Género</label><br>
+          <label for="genero-regis">Género</label>
           <select name="genero" id="genero-regis">
             <option value="H2">Helicoptero Apache</option>
             <option value="H">Hombre</option>
             <option value="M">Mujer</option>
-            <option value="LGBTIQ+">LGTIQ+</option>
+            <option value="LGBTIQ+">LGBTIQ+</option>
           </select>
           <br><br>
 
-          <label for="telefono-regis">Teléfono</label><br>
+          <label for="telefono-regis">Teléfono</label>
           <input type="number" id="telefono-regis">
           <br><br>
 
-          <label for="correo-regis">Correo electrónico</label><br>
+          <label for="correo-regis">Correo electrónico</label>
           <input type="text" id="correo-regis">
           <br><br>
 
-          <label for="direccion-regis">Dirección</label><br>
+          <label for="direccion-regis">Dirección</label>
           <input type="text" id="direccion-regis">
           <br><br>
 
-          <label for="ciudad-regis">Ciudad</label><br>
+          <label for="ciudad-regis">Ciudad</label>
           <input type="text" id="ciudad-regis">
           <br><br>
 
-          <label for="contraseña-regis">Contraseña</label><br>
-          <input type="text" id="contraseña-regis">
+          <label for="contraseña-regis">Contraseña</label>
+          <div class="input-container">
+            <input type="password" id="contraseña-regis" required>
+            <button type="button" id="toggle-password">👁️</button>
+          </div>
           <br><br>
 
           <button id="registrarse" class="registrarse">Registrarse</button>
@@ -110,7 +118,7 @@
     </section>
 
     <section id="dashboard" class="oculto">
-        <h1>Bienvenido al Banco Virtual</h1>
+        <h1>Bienvenido a Acme Bank</h1>
     
         <section id="resumen">
           <p><strong>Número de cuenta:</strong> <span id="cuenta">---</span></p>
@@ -122,27 +130,32 @@
         <section id="menu">
           <button onclick="mostrarOpcion('consignacion')">Consignación electrónica</button>
           <button onclick="mostrarOpcion('retiro')">Retiro</button>
-          <button onclick="mostrarOpcion('deposito')">Depósito</button>
+          <button onclick="mostrarOpcion('contenido')">Depósito</button>
           <button onclick="mostrarOpcion('reporte')">Ver reporte</button>
-          <button onclick="mostrarOpcion('resumen')">Resumen de transacciones</button>
+          <button onclick="mostrarOpcion('resumenTransacciones')">Resumen de transacciones</button>
           <button onclick="mostrarOpcion('servicios')">Pago de servicios públicos</button>
           <button onclick="mostrarOpcion('certificado')">Certificado bancario</button>
           <button onclick="mostrarOpcion('cerrar')">Cerrar sesión</button>
         </section>
     
         <section id="consignacion" class="contenido oculto">
-          <h2>Consignación Electrónica</h2>
-          <p><strong>Número de cuenta:</strong> <span id="cuentaUsuario">1234567890</span></p>
-          <p><strong>Nombre del usuario:</strong> <span id="nombreUsuario">Daniel Santiago González Hernández</span></p>
-          <label for="montoConsignar">Cantidad a consignar:</label>
-          <input type="number" id="montoConsignar" min="0" step="500" required />
-          <button onclick="realizarConsignacion()">Confirmar consignación</button>
-          <div id="resumenConsignacion" class="oculto">
-            <h3>Resumen de consignación</h3>
-            <p id="detalleConsignacion"></p>
-            <button onclick="window.print()">Imprimir resumen</button>
-          </div>
-        </section>
+            <h2>Consignación Electrónica</h2>
+          
+            <p><strong>Número de cuenta:</strong> <span id="cuentaUsuario">---</span></p>
+            <p><strong>Nombre del usuario:</strong> <span id="nombreUsuario">---</span></p>
+          
+            <label for="montoConsignar">Cantidad a consignar:</label>
+            <input type="number" id="montoConsignar" min="0" step="500" placeholder="Ej: 5000" required />
+          
+            <button id="btn-consignar" onclick="realizarConsignacion()">Confirmar consignación</button>
+          
+            <div id="resumenConsignacion" class="oculto">
+              <h3>Resumen de consignación</h3>
+              <p id="detalleConsignacion"></p>
+              <button onclick="window.print()">Imprimir resumen</button>
+            </div>
+          </section>
+          
     
         <section id="retiro" class="contenido oculto">
           <h2>Retiro de Dinero</h2>
@@ -152,7 +165,7 @@
         </section>
     
         <section id="contenido" class="contenido oculto">
-          <!-- Aquí se insertará el formulario de depósito dinámicamente con innerHTML -->
+        
         </section>
     
         <section id="reporte" class="contenido oculto">
@@ -194,21 +207,26 @@
         </section>
     
         <section id="resumenTransacciones" class="contenido oculto">
-          <h2>Resumen de Transacciones</h2>
-          <table id="tablaTransacciones" border="1" cellpadding="8" cellspacing="0">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Referencia</th>
-                <th>Tipo</th>
-                <th>Descripción</th>
-                <th>Valor</th>
-              </tr>
-            </thead>
-            <tbody id="cuerpoTablaTransacciones"></tbody>
-          </table>
-          <button onclick="window.print()">Imprimir resumen</button>
-        </section>
+            <h2>Resumen de Transacciones</h2>
+          
+            <table id="tablaTransacciones" class="tabla-transacciones" border="1" cellpadding="8" cellspacing="0">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Referencia</th>
+                  <th>Tipo</th>
+                  <th>Descripción</th>
+                  <th>Valor</th>
+                </tr>
+              </thead>
+              <tbody id="cuerpoTablaTransacciones">
+                
+              </tbody>
+            </table>
+          
+            <button id="btn-imprimir-transacciones" onclick="window.print()">Imprimir resumen</button>
+          </section>
+          
     
         <section id="cerrarSesion" class="contenido oculto">
           <h2>Sesión finalizada</h2>

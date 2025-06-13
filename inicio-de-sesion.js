@@ -65,6 +65,30 @@ document.addEventListener('DOMContentLoaded', () => {
       u.contraseña === contraseña
     );
 
+    const frases = [
+      "Temporada de patos... ¿otra vez? ¡No! Es temporada de ganancias explosivas en ACME Bank.",
+     "¡Dinero va! Como en los Looney Tunes, pero aquí sí puedes atraparlo.",
+     "Tus ahorros, más seguros que el Coyote comprando en ACME.",
+     "¡Boom! Tus finanzas despegan con más fuerza que una dinamita de dibujos animados.",
+     "Temporada de errores financieros... cancelada. ¡Bienvenido a ACME Bank!",
+     "Saltando más alto que Bugs Bunny… así sube tu saldo aquí.",
+     "¿Temporada de caos? No. Aquí solo temporada de control total de tu dinero.",
+     "Más confiable que cualquier invento del Coyote. Así es ACME Bank.",
+     "No necesitas una caja ACME, solo tu cuenta para lograrlo todo.",
+     "Tus finanzas corren tan rápido como el Correcaminos… ¡pero aquí no se escapan!",
+     "¿Temporada de pobreza? ¡Jamás! Aquí es temporada de progreso.",
+     "Más giros que el Taz… pero con cada vuelta, crece tu saldo.",
+     "Una cuenta tan fuerte como el martillo de Marvin el Marciano.",
+     "Aquí no caes en trampas del Coyote: cada clic te hace avanzar.",
+     "¡Es temporada de inversión! Y tus ganancias no conocen gravedad."
+     ];
+     
+     const pFrase = document.getElementById("frase-temporada");
+     if (pFrase) {
+       const aleatoria = frases[Math.floor(Math.random() * frases.length)];
+       pFrase.textContent = aleatoria;
+     }
+
     if (encontrado) {
       mensajeLogin.style.color = "green";
       mensajeLogin.textContent = "Inicio de sesión exitoso.";
@@ -108,6 +132,11 @@ document.addEventListener('DOMContentLoaded', () => {
       ciudad: document.getElementById('ciudad-regis').value.trim(),
       contraseña: document.getElementById('contraseña-regis').value
     };
+
+    if (!nuevoUsuario.correo.includes('@')) {
+      alert("Correo inválido: debe contener el símbolo '@'.");
+      return;
+    }
 
     // Validar campos obligatorios
     if (!nuevoUsuario.tipo || !nuevoUsuario.cedula || !nuevoUsuario.nombre || !nuevoUsuario.contraseña) {
@@ -169,5 +198,3 @@ if (usuarioSesion) {
   document.getElementById("inicio").classList.add("oculto");
   document.getElementById("dashboard").classList.remove("oculto");
 }
-
-

@@ -1,14 +1,17 @@
-// Objeto de cuenta del usuario activo
-let cuenta = {
+// ======================= Variables =======================
+
+// Obtener cuenta desde localStorage o crear nueva
+let cuenta = JSON.parse(localStorage.getItem("cuenta")) || {
   numero: generarNumeroCuenta(),
   saldo: 0,
   fecha: new Date().toLocaleDateString()
 };
 
-// Lista de transacciones
-let transacciones = [];
+// Obtener transacciones existentes
+let transacciones = JSON.parse(localStorage.getItem("transacciones")) || [];
 
-// Al cargar, mostrar datos básicos si hay sesión
+// ======================= Inicialización =======================
+
 document.addEventListener("DOMContentLoaded", () => {
   if (sessionStorage.getItem("usuario")) {
     document.getElementById("cuenta").textContent = cuenta.numero;
@@ -17,9 +20,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// ================ Funciones generales ================
+// ======================= Funciones generales =======================
 
-// Mostrar sección y ocultar las demás
 function mostrarOpcion(id) {
   const secciones = document.querySelectorAll(".contenido");
   secciones.forEach(sec => sec.classList.add("oculto"));
@@ -31,48 +33,62 @@ function mostrarOpcion(id) {
   if (id === "cerrar") cerrarSesion();
 }
 
-// Actualizar saldo en pantalla
 function actualizarSaldo() {
   document.getElementById("saldo").textContent = cuenta.saldo.toLocaleString();
+  guardarCuenta();
 }
 
-// Generar número de cuenta aleatorio
 function generarNumeroCuenta() {
   return "AC" + Math.floor(100000000 + Math.random() * 900000000);
 }
 
-// Generar una referencia aleatoria única
 function generarReferencia() {
   return "REF" + Math.floor(100000 + Math.random() * 900000);
 }
 
-// Registrar una transacción
 function registrarTransaccion(fecha, referencia, tipo, descripcion, valor) {
   transacciones.push({ fecha, referencia, tipo, descripcion, valor });
+  localStorage.setItem("transacciones", JSON.stringify(transacciones));
 }
 
-// ================ Consignación ================
+function guardarCuenta() {
+  localStorage.setItem("cuenta", JSON.stringify(cuenta));
+}
+
+// ======================= Consignación =======================
 
 function realizarConsignacion() {
-  const monto = parseFloat(document.getElementById("montoConsignar").value);
+  const montoInput = document.getElementById("montoConsignar");
+  const resumen = document.getElementById("resumenConsignacion");
+  const detalle = document.getElementById("detalleConsignacion");
+
+  const monto = parseFloat(montoInput.value);
   if (isNaN(monto) || monto <= 0) {
-    alert("Ingrese un monto válido.");
+    alert("Por favor ingrese un monto válido mayor a 0.");
+    return;
+  }
+
+  if (!cuenta || typeof cuenta.saldo !== "number") {
+    alert("Error: la cuenta no está definida correctamente.");
     return;
   }
 
   cuenta.saldo += monto;
   actualizarSaldo();
 
-  const fecha = new Date().toLocaleString();
+  const fecha = new Date().toLocaleString("es-CO");
   const ref = generarReferencia();
+
   registrarTransaccion(fecha, ref, "Consignación", "Depósito en cuenta", monto);
 
-  document.getElementById("detalleConsignacion").textContent =
-    `Consignaste $${monto.toLocaleString()} el ${fecha} con referencia ${ref}.`;
-  document.getElementById("resumenConsignacion").classList.remove("oculto");
+  detalle.textContent = `Consignaste $${monto.toLocaleString("es-CO")} el ${fecha} con referencia ${ref}.`;
+  resumen.classList.remove("oculto");
+
+  montoInput.value = "";
 }
 
-// ================ Retiro ================
+
+// ======================= Retiro =======================
 
 function realizarRetiro() {
   const monto = parseFloat(document.getElementById("montoRetiro").value);
@@ -96,15 +112,7 @@ function realizarRetiro() {
   alert(`Retiro de $${monto.toLocaleString()} realizado con éxito.`);
 }
 
-// ================ Reporte ================
-
-function mostrarReporte() {
-  document.getElementById("reporteCuenta").textContent = cuenta.numero;
-  document.getElementById("reporteSaldo").textContent = cuenta.saldo.toLocaleString();
-  document.getElementById("reporteFecha").textContent = cuenta.fecha;
-}
-
-// ================ Pago de Servicios ================
+// ======================= Pago de servicios =======================
 
 function realizarPagoServicio() {
   const tipo = document.getElementById("servicio").value;
@@ -132,7 +140,7 @@ function realizarPagoServicio() {
   document.getElementById("resumenPagoServicio").classList.remove("oculto");
 }
 
-// ================ Certificado ================
+// ======================= Certificado =======================
 
 function mostrarCertificado() {
   document.getElementById("certCuenta").textContent = cuenta.numero;
@@ -141,31 +149,58 @@ function mostrarCertificado() {
   document.getElementById("certEmision").textContent = new Date().toLocaleDateString();
 }
 
-// ================ Resumen Transacciones ================
+// ======================= Reporte =======================
+
+function mostrarReporte() {
+  document.getElementById("reporteCuenta").textContent = cuenta.numero;
+  document.getElementById("reporteSaldo").textContent = cuenta.saldo.toLocaleString();
+  document.getElementById("reporteFecha").textContent = cuenta.fecha;
+}
+
+// ======================= Resumen de transacciones =======================
 
 function mostrarResumenTransacciones() {
   const cuerpo = document.getElementById("cuerpoTablaTransacciones");
+  if (!cuerpo) return;
+
   cuerpo.innerHTML = "";
+
+  let transacciones = [];
+
+  try {
+    transacciones = JSON.parse(localStorage.getItem("transacciones")) || [];
+  } catch (error) {
+    console.error("Error al cargar transacciones desde localStorage:", error);
+    return;
+  }
+
+  if (!Array.isArray(transacciones) || transacciones.length === 0) {
+    const filaVacia = document.createElement("tr");
+    filaVacia.innerHTML = `<td colspan="5">No hay transacciones registradas.</td>`;
+    cuerpo.appendChild(filaVacia);
+    return;
+  }
 
   transacciones.forEach(tx => {
     const fila = document.createElement("tr");
     fila.innerHTML = `
-      <td>${tx.fecha}</td>
-      <td>${tx.referencia}</td>
-      <td>${tx.tipo}</td>
-      <td>${tx.descripcion}</td>
-      <td>$${tx.valor.toLocaleString()}</td>
+      <td>${tx.fecha ?? "Fecha no disponible"}</td>
+      <td>${tx.referencia ?? "N/A"}</td>
+      <td>${tx.tipo ?? "Desconocido"}</td>
+      <td>${tx.descripcion ?? "-"}</td>
+      <td>$${(Number(tx.valor) || 0).toLocaleString("es-CO")}</td>
     `;
     cuerpo.appendChild(fila);
   });
 }
 
-// ================ Cerrar sesión ================
+
+
+// ======================= Cerrar sesión =======================
 
 function cerrarSesion() {
   sessionStorage.removeItem("usuario");
 
-  // Ocultar dashboard, mostrar pantalla de despedida unos segundos
   document.getElementById("dashboard").classList.add("oculto");
   document.getElementById("cerrarSesion").classList.remove("oculto");
 
@@ -174,4 +209,7 @@ function cerrarSesion() {
     document.getElementById("inicio").classList.remove("oculto");
   }, 2500);
 }
+
+
+
 
