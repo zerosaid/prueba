@@ -27,6 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnRegistrar = document.getElementById('registrarse');
 
   // ======================
+  // Secciones principales
+  // ======================
+  const seccionInicio = document.getElementById('inicio');
+  const seccionDashboard = document.getElementById('dashboard');
+
+  // ======================
   // Eventos Login
   // ======================
   btnAbrirLogin.addEventListener('click', () => {
@@ -62,10 +68,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (encontrado) {
       mensajeLogin.style.color = "green";
       mensajeLogin.textContent = "Inicio de sesión exitoso.";
+
+      // Guardar sesión
       sessionStorage.setItem("usuario", usuario);
+
+      // Mostrar dashboard y ocultar inicio
       setTimeout(() => {
         ventanaLogin.style.display = 'none';
-        window.location.href = 'html.html';
+        seccionInicio.classList.add("oculto");
+        seccionDashboard.classList.remove("oculto");
       }, 1000);
     } else {
       mensajeLogin.style.color = "red";
@@ -98,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
       contraseña: document.getElementById('contraseña-regis').value
     };
 
+    // Validar campos obligatorios
     if (!nuevoUsuario.tipo || !nuevoUsuario.cedula || !nuevoUsuario.nombre || !nuevoUsuario.contraseña) {
       alert("Por favor complete todos los campos requeridos.");
       return;
@@ -135,4 +147,27 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('contraseña-regis').value = '';
   }
 
+  // ======================
+  // Cerrar sesión desde botón del menú
+  // ======================
+  const btnCerrarSesion = document.querySelector("button[onclick*='cerrar']");
+  if (btnCerrarSesion) {
+    btnCerrarSesion.addEventListener("click", () => {
+      sessionStorage.removeItem("usuario");
+      seccionDashboard.classList.add("oculto");
+      seccionInicio.classList.remove("oculto");
+    });
+  }
 });
+
+// ======================
+// Verificar sesión activa al cargar la página
+// ======================
+const usuarioSesion = sessionStorage.getItem("usuario");
+
+if (usuarioSesion) {
+  document.getElementById("inicio").classList.add("oculto");
+  document.getElementById("dashboard").classList.remove("oculto");
+}
+
+

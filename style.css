@@ -336,3 +336,8 @@ footer a:hover {
     max-width: 300px;
   }
 }
+
+
+.oculto {
+  display: none;
+}
