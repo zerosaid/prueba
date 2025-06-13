@@ -1,4 +1,11 @@
+// ======================
+// Inicialización DOM
+// ======================
 document.addEventListener('DOMContentLoaded', () => {
+
+  // ======================
+  // Elementos Login
+  // ======================
   const btnAbrirLogin = document.getElementById('btn-iniciar-sesion');
   const ventanaLogin = document.getElementById('window');
   const btnCerrarLogin = document.getElementById('btn-cerrar');
@@ -11,11 +18,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const inputCedula = document.getElementById('cedula');
   const inputContraseña = document.getElementById('contraseña');
 
+  // ======================
+  // Elementos Registro
+  // ======================
   const ventanaRegis = document.getElementById('window-regis');
   const btnAbrirRegis = document.getElementById('btn-registrarse');
   const btnCerrarRegistro = document.getElementById('btn-cerrar-registro');
   const btnRegistrar = document.getElementById('registrarse');
 
+  // ======================
+  // Eventos Login
+  // ======================
   btnAbrirLogin.addEventListener('click', () => {
     ventanaLogin.style.display = 'block';
     mensajeLogin.textContent = '';
@@ -26,19 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
     limpiarCamposLogin();
   });
 
-  btnAbrirRegis.addEventListener('click', () => {
-    ventanaRegis.style.display = 'block';
-  });
-
   linkRegistrarDesdeLogin.addEventListener('click', (e) => {
     e.preventDefault();
     ventanaLogin.style.display = 'none';
     ventanaRegis.style.display = 'block';
-  });
-
-  btnCerrarRegistro.addEventListener('click', () => {
-    ventanaRegis.style.display = 'none';
-    limpiarCamposRegistro();
   });
 
   btnConfirmarLogin.addEventListener('click', () => {
@@ -46,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tipo = inputTipo.value;
     const cedula = inputCedula.value.trim();
     const contraseña = inputContraseña.value;
+
     const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
     const encontrado = usuarios.find(u =>
       u.nombre === usuario &&
@@ -68,6 +73,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // ======================
+  // Eventos Registro
+  // ======================
+  btnAbrirRegis.addEventListener('click', () => {
+    ventanaRegis.style.display = 'block';
+  });
+
+  btnCerrarRegistro.addEventListener('click', () => {
+    ventanaRegis.style.display = 'none';
+    limpiarCamposRegistro();
+  });
+
   btnRegistrar.addEventListener('click', () => {
     const nuevoUsuario = {
       tipo: document.getElementById('tipo-regis').value,
@@ -81,12 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
       contraseña: document.getElementById('contraseña-regis').value
     };
 
-    if (
-      !nuevoUsuario.tipo ||
-      !nuevoUsuario.cedula ||
-      !nuevoUsuario.nombre ||
-      !nuevoUsuario.contraseña
-    ) {
+    if (!nuevoUsuario.tipo || !nuevoUsuario.cedula || !nuevoUsuario.nombre || !nuevoUsuario.contraseña) {
       alert("Por favor complete todos los campos requeridos.");
       return;
     }
@@ -100,6 +112,9 @@ document.addEventListener('DOMContentLoaded', () => {
     limpiarCamposRegistro();
   });
 
+  // ======================
+  // Funciones Auxiliares
+  // ======================
   function limpiarCamposLogin() {
     inputUsuario.value = '';
     inputTipo.selectedIndex = 0;
@@ -119,7 +134,5 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('ciudad-regis').value = '';
     document.getElementById('contraseña-regis').value = '';
   }
+
 });
-
-
-

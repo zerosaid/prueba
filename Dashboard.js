@@ -1,5 +1,18 @@
+// =========================
+// Variables globales
+// =========================
 const transacciones = [];
+let contadorOperaciones = 0;
 
+const cuenta = {
+  numero: "1234567890",
+  saldo: 325000,
+  fechaCreacion: "2023-10-12",
+};
+
+// =========================
+// Menú hamburguesa
+// =========================
 const toggleBtn = document.getElementById('hamburguesa');
 const menu = document.getElementById('menu');
 
@@ -7,6 +20,9 @@ toggleBtn.addEventListener('click', () => {
   menu.classList.toggle('mostrar');
 });
 
+// =========================
+// Autenticación y carga inicial
+// =========================
 document.addEventListener("DOMContentLoaded", () => {
   const usuario = sessionStorage.getItem("usuario");
   if (!usuario) {
@@ -17,14 +33,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-const cuenta = {
-  numero: "1234567890",
-  saldo: 325000,
-  fechaCreacion: "2023-10-12",
+window.onload = () => {
+  document.getElementById("cuenta").textContent = cuenta.numero;
+  document.getElementById("saldo").textContent = cuenta.saldo.toLocaleString();
+  document.getElementById("fecha").textContent = cuenta.fechaCreacion;
 };
 
-let contadorOperaciones = 0;
-
+// =========================
+// Utilidades
+// =========================
 function actualizarSaldo() {
   document.getElementById("saldo").textContent = cuenta.saldo.toLocaleString();
 }
@@ -38,6 +55,9 @@ function registrarTransaccion(fecha, referencia, tipo, descripcion, valor) {
   if (transacciones.length > 10) transacciones.pop();
 }
 
+// =========================
+// Cargo por uso del sistema
+// =========================
 function verificarCargoPorUso() {
   contadorOperaciones++;
   if (contadorOperaciones % 5 === 0) {
@@ -55,18 +75,13 @@ function verificarCargoPorUso() {
   }
 }
 
-window.onload = () => {
-  document.getElementById("cuenta").textContent = cuenta.numero;
-  document.getElementById("saldo").textContent = cuenta.saldo.toLocaleString();
-  document.getElementById("fecha").textContent = cuenta.fechaCreacion;
-};
-
+// =========================
+// Navegación de opciones
+// =========================
 function mostrarOpcion(opcion) {
-  // Oculta todo
   const secciones = document.querySelectorAll(".contenido");
   secciones.forEach((seccion) => (seccion.style.display = "none"));
 
-  // También oculta el contenedor dinámico de depósito si existe
   const contenedor = document.getElementById("contenido");
   if (contenedor) {
     contenedor.style.display = "none";
@@ -90,9 +105,7 @@ function mostrarOpcion(opcion) {
       document.getElementById("reporteSaldo").textContent = cuenta.saldo.toLocaleString();
       document.getElementById("reporteFecha").textContent = cuenta.fechaCreacion;
       break;
-
     case "deposito":
-      const contenedor = document.getElementById("contenido");
       if (contenedor) {
         contenedor.style.display = "block";
         contenedor.innerHTML = `
@@ -105,7 +118,7 @@ function mostrarOpcion(opcion) {
       } else {
         console.error("No se encontró el contenedor 'contenido'.");
       }
-        break;
+      break;
     case "servicios":
       document.getElementById("servicios").style.display = "block";
       break;
@@ -126,6 +139,9 @@ function mostrarOpcion(opcion) {
   }
 }
 
+// =========================
+// Operaciones bancarias
+// =========================
 function realizarRetiro() {
   const input = document.getElementById("montoRetiro");
   const monto = parseFloat(input?.value);
@@ -133,12 +149,10 @@ function realizarRetiro() {
     alert("Por favor ingresa un monto válido.");
     return;
   }
-
   if (monto > cuenta.saldo) {
     alert("Saldo insuficiente.");
     return;
   }
-
   cuenta.saldo -= monto;
   actualizarSaldo();
   const fecha = new Date().toLocaleString();
@@ -156,46 +170,21 @@ function realizarConsignacion() {
     alert("Por favor ingresa un monto válido.");
     return;
   }
-
   cuenta.saldo += monto;
   actualizarSaldo();
   const fecha = new Date().toLocaleString();
   const referencia = generarReferencia();
   registrarTransaccion(fecha, referencia, "Consignación", "Consignación por canal electrónico", monto);
   verificarCargoPorUso();
-
   document.getElementById("detalleConsignacion").innerHTML = `
     Fecha: ${fecha}<br>
     Referencia: ${referencia}<br>
     Tipo: Consignación<br>
     Descripción: Consignación por canal electrónico<br>
-    Valor: $${monto.toLocaleString()}
-  `;
+    Valor: $${monto.toLocaleString()}`;
   document.getElementById("resumenConsignacion").style.display = "block";
   alert("Consignación realizada exitosamente.");
   input.value = "";
-}
-
-function mostrarResumenTransacciones() {
-  const cuerpo = document.getElementById("cuerpoTablaTransacciones");
-  cuerpo.innerHTML = "";
-
-  if (transacciones.length === 0) {
-    cuerpo.innerHTML = `<tr><td colspan="5">No hay transacciones registradas.</td></tr>`;
-    return;
-  }
-
-  transacciones.forEach(tx => {
-    const fila = document.createElement("tr");
-    fila.innerHTML = `
-      <td>${tx.fecha}</td>
-      <td>${tx.referencia}</td>
-      <td>${tx.tipo}</td>
-      <td>${tx.descripcion}</td>
-      <td>$${tx.valor.toLocaleString()}</td>
-    `;
-    cuerpo.appendChild(fila);
-  });
 }
 
 function realizarPagoServicio() {
@@ -205,25 +194,21 @@ function realizarPagoServicio() {
     alert("Por favor ingresa un monto válido.");
     return;
   }
-
   if (monto > cuenta.saldo) {
     alert("Saldo insuficiente para realizar el pago.");
     return;
   }
-
   cuenta.saldo -= monto;
   actualizarSaldo();
   const fecha = new Date().toLocaleString();
   const referencia = generarReferencia();
   registrarTransaccion(fecha, referencia, "Servicio público", `Pago de servicio: ${tipo}`, monto);
   verificarCargoPorUso();
-
   document.getElementById("detallePagoServicio").innerHTML = `
     Fecha: ${fecha}<br>
     Referencia: ${referencia}<br>
     Servicio: ${tipo}<br>
-    Valor pagado: $${monto.toLocaleString()}
-  `;
+    Valor pagado: $${monto.toLocaleString()}`;
   document.getElementById("resumenPagoServicio").style.display = "block";
   alert("Pago realizado exitosamente.");
 }
@@ -231,30 +216,39 @@ function realizarPagoServicio() {
 function realizarDeposito() {
   const input = document.getElementById("deposito");
   const valor = parseFloat(input.value);
-
   if (isNaN(valor) || valor <= 0) {
     alert("Por favor ingresa una cantidad válida mayor a 0.");
     return;
   }
-
   cuenta.saldo += valor;
-
-  // Registrar en el historial de transacciones
-  const transaccion = {
-    fecha: new Date().toLocaleString(),
-    referencia: generarReferencia(),
-    tipo: "Depósito",
-    descripcion: "Depósito realizado en caja",
-    valor: valor.toLocaleString(),
-  };
-  transacciones.push(transaccion);
-
-  // Actualizar datos en la interfaz
-  document.getElementById("saldo").textContent = cuenta.saldo.toLocaleString();
-
+  const fecha = new Date().toLocaleString();
+  const referencia = generarReferencia();
+  registrarTransaccion(fecha, referencia, "Depósito", "Depósito realizado en caja", valor);
+  actualizarSaldo();
   alert(`Depósito exitoso. Nuevo saldo: $${cuenta.saldo.toLocaleString()}`);
-
-  // Ocultar el formulario después de confirmar
   document.getElementById("contenido").style.display = "none";
   document.getElementById("contenido").innerHTML = "";
 }
+
+// =========================
+// Mostrar resumen
+// =========================
+function mostrarResumenTransacciones() {
+  const cuerpo = document.getElementById("cuerpoTablaTransacciones");
+  cuerpo.innerHTML = "";
+  if (transacciones.length === 0) {
+    cuerpo.innerHTML = `<tr><td colspan="5">No hay transacciones registradas.</td></tr>`;
+    return;
+  }
+  transacciones.forEach(tx => {
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td>${tx.fecha}</td>
+      <td>${tx.referencia}</td>
+      <td>${tx.tipo}</td>
+      <td>${tx.descripcion}</td>
+      <td>$${tx.valor.toLocaleString()}</td>`;
+    cuerpo.appendChild(fila);
+  });
+}
+
