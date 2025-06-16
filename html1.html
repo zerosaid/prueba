@@ -1,11 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Banco Virtual</title>
   <link rel="stylesheet" href="style2.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
 </head>
+
 <body>
   <header>
     <h2>Banco Virtual</h2>
@@ -14,7 +19,8 @@
   <main>
     <h1>Bienvenido</h1>
     <p>
-      Gestiona tus finanzas de forma segura y confiable. Consulta tu saldo, realiza transferencias y más desde la comodidad de tu hogar.
+      Gestiona tus finanzas de forma segura y confiable. Consulta tu saldo, realiza transferencias y más desde la
+      comodidad de tu hogar.
     </p>
     <button id="btn-iniciar-sesion">Iniciar sesión</button>
 
@@ -38,14 +44,45 @@
         <label for="cedula">Ingrese su numero de documento de identificacion</label><br>
         <input type="number" id="cedula" required min="1"><br><br>
 
-        <label for="contraseña">Ingrese su contraseña</label><br>
-        <input type="password" id="contraseña" required><br><br>
-
+        <label for="contraseña-login">Contraseña</label>
+          <div class="input-container">
+            <input type="password" id="contraseña-login" required>
+            <button type="button" id="toggle-password-login">👁️</button>
+          </div>
+        <br><br>
+        
         <button id="btn-confirmar">Iniciar sesión</button>
+        <br><br>
         <button id="btn-cerrar">❌</button>
         <p id="mensaje-login"></p>
 
         <p>No tienes cuenta? <a href="#" id="link-a-registrar">Registrarse</a></p>
+
+        <p><a href="#" id="link-recuperar">¿Olvidaste tu contraseña?</a></p>
+        
+      </div>
+    </div>
+
+    <div id="window-recuperar" class="window-regis oculto">
+      <div class="window-regis-cont">
+        <h2>Recuperar contraseña</h2>
+        <p>Ingrese su número de documento y su correo electrónico para recuperar el acceso.</p>
+    
+        <label for="recuperar-cedula">Número de documento</label>
+        <input type="number" id="recuperar-cedula" required><br>
+    
+        <label for="recuperar-correo">Correo electrónico</label>
+        <input type="email" id="recuperar-correo" required><br>
+    
+        <button id="btn-enviar-recuperacion">Enviar instrucciones</button><br><br>
+    
+        <div id="form-cambiar-pass" class="oculto">
+          <label for="nueva-contraseña">Nueva contraseña</label>
+          <input type="password" id="nueva-contraseña" required>
+          <button id="btn-cambiar-contraseña">Actualizar contraseña</button>
+        </div>
+    
+        <button id="btn-cerrar-recuperar">❌</button>
       </div>
     </div>
 
@@ -98,8 +135,11 @@
         <input type="text" id="ciudad-regis">
         <br><br>
 
-        <label for="contraseña-regis">Ingrese su contraseña</label><br>
-        <input type="text" id="contraseña-regis">
+        <label for="contraseña-regis">Contraseña</label>
+          <div class="input-container">
+            <input type="password" id="contraseña-regis" required>
+            <button type="button" id="toggle-password-regis">👁️</button>
+          </div>
         <br><br>
 
         <button id="registrarse" class="registrarse">Registrarse</button>
@@ -108,10 +148,9 @@
         <button id="btn-cerrar-registro">❌</button>
       </div>
     </div>
-
-    <p>tipo de documento, numero de documento, nombres con apellidos, genero, telefono, correo, direccion, ciudad de residencia y contraseña</p>
   </main>
 
   <script src="./inicio-de-sesion.js"></script>
 </body>
+
 </html>

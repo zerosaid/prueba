@@ -1,253 +1,399 @@
-// =========================
+// =============================
+// Configuración de Firebase
+// =============================
+const firebaseConfig = {
+  apiKey: "AIzaSyCeVjR_a-Ws1MhmI6REyshNWk3-GUWK_Q",
+  authDomain: "prueba-10764.firebaseapp.com",
+  databaseURL: "https://prueba-10764-default-rtdb.firebaseio.com",
+  projectId: "prueba-10764",
+  storageBucket: "prueba-10764.appspot.com",
+  messagingSenderId: "1088604649539",
+  appId: "1:1088604649539:web:c3629a654dabc7c8a7cf6f"
+};
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.database(app);
+
+// =============================
 // Variables globales
-// =========================
-const transacciones = [];
-let contadorOperaciones = 0;
+// =============================
+let usuarioActual = null;
+let datosUsuario = null;
+let transacciones = [];
 
-const cuenta = {
-  numero: "1234567890",
-  saldo: 325000,
-  fechaCreacion: "2023-10-12",
-};
+// =============================
+// Elementos del DOM
+// =============================
+const nombreUsuarioElem = document.getElementById("nombre-usuario");
+const cuentaNumeroElem = document.getElementById("numero-cuenta");
+const saldoElem = document.getElementById("saldo");
+const fechaCreacionElem = document.getElementById("fecha-creacion");
+const titularElem = document.getElementById("titular");
 
-// =========================
-// Menú hamburguesa
-// =========================
-const toggleBtn = document.getElementById('hamburguesa');
-const menu = document.getElementById('menu');
-
-toggleBtn.addEventListener('click', () => {
-  menu.classList.toggle('mostrar');
-});
-
-// =========================
-// Autenticación y carga inicial
-// =========================
+// =============================
+// Función principal al cargar la página
+// =============================
 document.addEventListener("DOMContentLoaded", () => {
-  const usuario = sessionStorage.getItem("usuario");
-  if (!usuario) {
-    window.location.href = "html1.html";
-  } else {
-    const nombreElemento = document.getElementById("nombreUsuario");
-    if (nombreElemento) nombreElemento.textContent = usuario;
+  const nombreUsuario = sessionStorage.getItem("usuario");
+  if (!nombreUsuario) {
+    alert("Debe iniciar sesión.");
+    window.location.href = "1.html";
+    return;
   }
+
+  const usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+  const usuario = usuarios.find(u => u.nombre === nombreUsuario);
+
+  if (!usuario) {
+    alert("Usuario no encontrado.");
+    return;
+  }
+
+  datosUsuario = usuario;
+
+  if (!datosUsuario.numeroCuenta) {
+    datosUsuario.numeroCuenta = generarNumeroCuenta();
+    datosUsuario.fechaCreacion = obtenerFechaHoy();
+    const index = usuarios.findIndex(u => u.nombre === nombreUsuario);
+    usuarios[index] = datosUsuario;
+    localStorage.setItem("usuarios", JSON.stringify(usuarios));
+    db.ref('usuarios/' + datosUsuario.cedula + '/numeroCuenta').set(datosUsuario.numeroCuenta);
+    db.ref('usuarios/' + datosUsuario.cedula + '/fechaCreacion').set(datosUsuario.fechaCreacion);
+  }
+
+  db.ref("usuarios/" + datosUsuario.cedula).once("value").then(snapshot => {
+    if (snapshot.exists()) {
+      usuarioActual = snapshot.val();
+      usuarioActual.cedula = datosUsuario.cedula;
+      mostrarDatosUsuario();
+      mostrarResumenTransacciones();
+    } else {
+      alert("No se encontraron datos del usuario en Firebase.");
+    }
+  });
 });
 
-window.onload = () => {
-  document.getElementById("cuenta").textContent = cuenta.numero;
-  document.getElementById("saldo").textContent = cuenta.saldo.toLocaleString();
-  document.getElementById("fecha").textContent = cuenta.fechaCreacion;
-};
+// =============================
+// Navegación
+// =============================
+let seccionVisible = null;
 
-// =========================
-// Utilidades
-// =========================
-function actualizarSaldo() {
-  document.getElementById("saldo").textContent = cuenta.saldo.toLocaleString();
-}
-
-function generarReferencia() {
-  return "REF" + Math.floor(100000 + Math.random() * 900000);
-}
-
-function registrarTransaccion(fecha, referencia, tipo, descripcion, valor) {
-  transacciones.unshift({ fecha, referencia, tipo, descripcion, valor });
-  if (transacciones.length > 10) transacciones.pop();
-}
-
-// =========================
-// Cargo por uso del sistema
-// =========================
-function verificarCargoPorUso() {
-  contadorOperaciones++;
-  if (contadorOperaciones % 5 === 0) {
-    const valorCargo = 1200;
-    if (cuenta.saldo >= valorCargo) {
-      cuenta.saldo -= valorCargo;
-      actualizarSaldo();
-      const fecha = new Date().toLocaleString();
-      const referencia = generarReferencia();
-      registrarTransaccion(fecha, referencia, "Cargo", "Cargo por uso del sistema", valorCargo);
-      alert("Se aplicó un cargo automático de $1.200 por uso del sistema.");
-    } else {
-      alert("No se pudo aplicar el cargo por uso del sistema: saldo insuficiente.");
-    }
-  }
-}
-
-// =========================
-// Navegación de opciones
-// =========================
 function mostrarOpcion(opcion) {
-  const secciones = document.querySelectorAll(".contenido");
-  secciones.forEach((seccion) => (seccion.style.display = "none"));
-
-  const contenedor = document.getElementById("contenido");
-  if (contenedor) {
-    contenedor.style.display = "none";
-    contenedor.innerHTML = "";
+  if (opcion === 'cerrar') {
+    cerrarSesion();
+    return;
   }
+
+  const nuevaSeccion = document.getElementById(opcion);
+  if (!nuevaSeccion) return;
+
+  const yaVisible = !nuevaSeccion.classList.contains("oculto");
+  if (seccionVisible === nuevaSeccion && yaVisible) {
+    nuevaSeccion.classList.add("oculto");
+    seccionVisible = null;
+    return;
+  }
+
+  ocultarSecciones();
 
   switch (opcion) {
-    case "consignacion":
-      document.getElementById("consignacion").style.display = "block";
+    case 'consignacion':
+      mostrarFormularioConsignacion();
       break;
-    case "retiro":
-      document.getElementById("retiro").style.display = "block";
+    case 'retiro':
+      retirar();
       break;
-    case "resumen":
-      document.getElementById("resumenTransacciones").style.display = "block";
+    case 'deposito':
+      depositar();
+      break;
+    case 'reporte':
+      verReporte();
+      break;
+    case 'resumen':
       mostrarResumenTransacciones();
       break;
-    case "reporte":
-      document.getElementById("reporte").style.display = "block";
-      document.getElementById("reporteCuenta").textContent = cuenta.numero;
-      document.getElementById("reporteSaldo").textContent = cuenta.saldo.toLocaleString();
-      document.getElementById("reporteFecha").textContent = cuenta.fechaCreacion;
+    case 'servicios':
+      nuevaSeccion.classList.remove("oculto");
       break;
-    case "deposito":
-      if (contenedor) {
-        contenedor.style.display = "block";
-        contenedor.innerHTML = `
-          <h2>Depósito de Dinero</h2>
-          <label for="deposito">Cantidad a depositar:</label>
-          <input type="number" id="deposito" min="1" required>
-          <br><br>
-          <button onclick="realizarDeposito()">Confirmar depósito</button>
-        `;
-      } else {
-        console.error("No se encontró el contenedor 'contenido'.");
-      }
-      break;
-    case "servicios":
-      document.getElementById("servicios").style.display = "block";
-      break;
-    case "certificado":
-      document.getElementById("certificado").style.display = "block";
-      document.getElementById("certCuenta").textContent = cuenta.numero;
-      document.getElementById("certSaldo").textContent = cuenta.saldo.toLocaleString();
-      document.getElementById("certFecha").textContent = cuenta.fechaCreacion;
-      document.getElementById("certEmision").textContent = new Date().toLocaleString();
-      break;
-    case "cerrar":
-      transacciones.length = 0;
-      sessionStorage.removeItem("usuario");
-      window.location.href = "html1.html";
+    case 'certificado':
+      mostrarCertificado();
       break;
     default:
-      alert("Opción no válida.");
+      console.warn("Opción no reconocida:", opcion);
+      return;
   }
+
+  seccionVisible = nuevaSeccion;
 }
 
-// =========================
-// Operaciones bancarias
-// =========================
-function realizarRetiro() {
-  const input = document.getElementById("montoRetiro");
-  const monto = parseFloat(input?.value);
-  if (!input || isNaN(monto) || monto <= 0) {
-    alert("Por favor ingresa un monto válido.");
-    return;
-  }
-  if (monto > cuenta.saldo) {
-    alert("Saldo insuficiente.");
-    return;
-  }
-  cuenta.saldo -= monto;
-  actualizarSaldo();
-  const fecha = new Date().toLocaleString();
-  const referencia = generarReferencia();
-  registrarTransaccion(fecha, referencia, "Retiro", "Retiro desde cuenta", monto);
-  verificarCargoPorUso();
-  alert(`Retiro exitoso por $${monto.toLocaleString()}`);
-  input.value = "";
+function ocultarSecciones() {
+  const ids = [
+    "consignacion", "retiro", "deposito", "contenido",
+    "seccionReporte", "servicios", "certificado",
+    "resumenTransacciones", "cerrarSesion"
+  ];
+  ids.forEach(id => {
+    const elem = document.getElementById(id);
+    if (elem) elem.classList.add("oculto");
+  });
+}
+
+// =============================
+// Funciones de operaciones bancarias
+// =============================
+function mostrarFormularioConsignacion() {
+  document.getElementById("consignacion").classList.remove("oculto");
+  document.getElementById("cuentaUsuario").textContent = usuarioActual.numeroCuenta || "---";
+  document.getElementById("nombreUsuario").textContent = usuarioActual.nombre || "---";
 }
 
 function realizarConsignacion() {
-  const input = document.getElementById("montoConsignar");
-  const monto = parseFloat(input?.value);
-  if (!input || isNaN(monto) || monto <= 0) {
-    alert("Por favor ingresa un monto válido.");
-    return;
-  }
-  cuenta.saldo += monto;
-  actualizarSaldo();
-  const fecha = new Date().toLocaleString();
-  const referencia = generarReferencia();
-  registrarTransaccion(fecha, referencia, "Consignación", "Consignación por canal electrónico", monto);
-  verificarCargoPorUso();
+  const monto = parseFloat(document.getElementById("montoConsignar").value);
+  if (isNaN(monto) || monto <= 0) return alert("Ingrese un valor válido.");
+
+  usuarioActual.saldo = (usuarioActual.saldo || 0) + monto;
+
+  const tx = {
+    fecha: obtenerFechaHoy(),
+    referencia: generarReferencia(),
+    tipo: "Consignación",
+    descripcion: "Consignación electrónica",
+    valor: monto
+  };
+
+  usuarioActual.transacciones = usuarioActual.transacciones || [];
+  usuarioActual.transacciones.push(tx);
+
+  db.ref("usuarios/" + usuarioActual.cedula).update({
+    saldo: usuarioActual.saldo,
+    transacciones: usuarioActual.transacciones
+  });
+
   document.getElementById("detalleConsignacion").innerHTML = `
-    Fecha: ${fecha}<br>
-    Referencia: ${referencia}<br>
-    Tipo: Consignación<br>
-    Descripción: Consignación por canal electrónico<br>
-    Valor: $${monto.toLocaleString()}`;
-  document.getElementById("resumenConsignacion").style.display = "block";
-  alert("Consignación realizada exitosamente.");
-  input.value = "";
+    Se consignaron <strong>$${monto.toLocaleString()}</strong> a la cuenta <strong>${usuarioActual.numeroCuenta}</strong><br>
+    Fecha: ${tx.fecha} | Ref: ${tx.referencia}
+  `;
+  document.getElementById("resumenConsignacion").classList.remove("oculto");
+
+  mostrarDatosUsuario();
+  mostrarResumenTransacciones();
+  document.getElementById("montoConsignar").value = "";
 }
 
-function realizarPagoServicio() {
-  const tipo = document.getElementById("servicio").value;
-  const monto = parseFloat(document.getElementById("valorServicio").value);
-  if (isNaN(monto) || monto <= 0) {
-    alert("Por favor ingresa un monto válido.");
-    return;
-  }
-  if (monto > cuenta.saldo) {
-    alert("Saldo insuficiente para realizar el pago.");
-    return;
-  }
-  cuenta.saldo -= monto;
-  actualizarSaldo();
-  const fecha = new Date().toLocaleString();
-  const referencia = generarReferencia();
-  registrarTransaccion(fecha, referencia, "Servicio público", `Pago de servicio: ${tipo}`, monto);
-  verificarCargoPorUso();
-  document.getElementById("detallePagoServicio").innerHTML = `
-    Fecha: ${fecha}<br>
-    Referencia: ${referencia}<br>
-    Servicio: ${tipo}<br>
-    Valor pagado: $${monto.toLocaleString()}`;
-  document.getElementById("resumenPagoServicio").style.display = "block";
-  alert("Pago realizado exitosamente.");
+function retirar() {
+  document.getElementById("retiro").classList.remove("oculto");
+  document.getElementById("cuentaUsuarioRetiro").textContent = usuarioActual.numeroCuenta || "---";
+  document.getElementById("nombreUsuarioRetiro").textContent = usuarioActual.nombre || "---";
+}
+
+function realizarRetiro() {
+  const monto = parseFloat(document.getElementById("montoRetirar").value);
+  if (isNaN(monto) || monto <= 0) return alert("Ingrese un monto válido.");
+  if (usuarioActual.saldo < monto) return alert("Saldo insuficiente.");
+
+  usuarioActual.saldo -= monto;
+
+  const tx = {
+    fecha: obtenerFechaHoy(),
+    referencia: generarReferencia(),
+    tipo: "Retiro",
+    descripcion: "Retiro de efectivo",
+    valor: monto
+  };
+
+  usuarioActual.transacciones = usuarioActual.transacciones || [];
+  usuarioActual.transacciones.push(tx);
+
+  db.ref("usuarios/" + usuarioActual.cedula).update({
+    saldo: usuarioActual.saldo,
+    transacciones: usuarioActual.transacciones
+  });
+
+  document.getElementById("detalleRetiro").textContent = `Retiraste $${monto.toLocaleString()} el ${tx.fecha} (Ref: ${tx.referencia})`;
+  document.getElementById("resumenRetiro").classList.remove("oculto");
+
+  mostrarDatosUsuario();
+  mostrarResumenTransacciones();
+}
+
+function depositar() {
+  document.getElementById("deposito").classList.remove("oculto");
+  document.getElementById("cuentaUsuarioDeposito").textContent = usuarioActual.numeroCuenta || "---";
+  document.getElementById("nombreUsuarioDeposito").textContent = usuarioActual.nombre || "---";
 }
 
 function realizarDeposito() {
-  const input = document.getElementById("deposito");
-  const valor = parseFloat(input.value);
-  if (isNaN(valor) || valor <= 0) {
-    alert("Por favor ingresa una cantidad válida mayor a 0.");
-    return;
-  }
-  cuenta.saldo += valor;
-  const fecha = new Date().toLocaleString();
-  const referencia = generarReferencia();
-  registrarTransaccion(fecha, referencia, "Depósito", "Depósito realizado en caja", valor);
-  actualizarSaldo();
-  alert(`Depósito exitoso. Nuevo saldo: $${cuenta.saldo.toLocaleString()}`);
-  document.getElementById("contenido").style.display = "none";
-  document.getElementById("contenido").innerHTML = "";
+  const monto = parseFloat(document.getElementById("montoDepositar").value);
+  if (isNaN(monto) || monto <= 0) return alert("Ingrese un monto válido.");
+
+  usuarioActual.saldo += monto;
+
+  const tx = {
+    fecha: obtenerFechaHoy(),
+    referencia: generarReferencia(),
+    tipo: "Depósito",
+    descripcion: "Depósito en oficina",
+    valor: monto
+  };
+
+  usuarioActual.transacciones = usuarioActual.transacciones || [];
+  usuarioActual.transacciones.push(tx);
+
+  db.ref("usuarios/" + usuarioActual.cedula).update({
+    saldo: usuarioActual.saldo,
+    transacciones: usuarioActual.transacciones
+  });
+
+  document.getElementById("detalleDeposito").textContent = `Depositaste $${monto.toLocaleString()} el ${tx.fecha} (Ref: ${tx.referencia})`;
+  document.getElementById("resumenDeposito").classList.remove("oculto");
+
+  mostrarDatosUsuario();
+  mostrarResumenTransacciones();
 }
 
-// =========================
-// Mostrar resumen
-// =========================
+// =============================
+// Pago de Servicios
+// =============================
+function realizarPagoServicio() {
+  const tipo = document.getElementById("servicio").value;
+  const monto = parseFloat(document.getElementById("valorServicio").value);
+  if (isNaN(monto) || monto <= 0) return alert("Monto inválido.");
+  if (monto > usuarioActual.saldo) return alert("Saldo insuficiente.");
+
+  usuarioActual.saldo -= monto;
+
+  const tx = {
+    fecha: obtenerFechaHoy(),
+    referencia: generarReferencia(),
+    tipo: "Pago de servicios",
+    descripcion: `Pago de ${tipo}`,
+    valor: monto
+  };
+
+  usuarioActual.transacciones = usuarioActual.transacciones || [];
+  usuarioActual.transacciones.push(tx);
+
+  db.ref("usuarios/" + usuarioActual.cedula).update({
+    saldo: usuarioActual.saldo,
+    transacciones: usuarioActual.transacciones
+  });
+
+  mostrarDatosUsuario();
+  mostrarResumenTransacciones();
+
+  document.getElementById("detallePagoServicio").innerHTML = `
+    Servicio: ${tipo}<br>
+    Monto: $${monto.toLocaleString()}<br>
+    Fecha: ${tx.fecha}<br>
+    Referencia: ${tx.referencia}
+  `;
+  document.getElementById("resumenPagoServicio").classList.remove("oculto");
+  document.getElementById("valorServicio").value = "";
+}
+
+// =============================
+// Reporte y certificado
+// =============================
+function verReporte() {
+  if (!usuarioActual) return console.warn("Usuario no cargado.");
+  document.getElementById("reporteNombre").textContent = usuarioActual.nombre;
+  document.getElementById("reporteCedula").textContent = usuarioActual.cedula;
+  document.getElementById("reporteCuenta").textContent = usuarioActual.numeroCuenta;
+  document.getElementById("reporteFecha").textContent = usuarioActual.fechaCreacion;
+  document.getElementById("reporteSaldo").textContent = "$" + Number(usuarioActual.saldo || 0).toLocaleString();
+  document.getElementById("seccionReporte").classList.remove("oculto");
+}
+
+function mostrarCertificado() {
+  if (!usuarioActual) return alert("No se ha cargado la información.");
+  document.getElementById("titular").textContent = usuarioActual.nombre;
+  document.getElementById("certCuenta").textContent = usuarioActual.numeroCuenta;
+  document.getElementById("certSaldo").textContent = "$" + Number(usuarioActual.saldo || 0).toLocaleString();
+  document.getElementById("certFecha").textContent = usuarioActual.fechaCreacion;
+  document.getElementById("certEmision").textContent = new Date().toLocaleDateString("es-CO", {
+    day: "2-digit", month: "long", year: "numeric"
+  });
+  ocultarSecciones();
+  document.getElementById("certificado").classList.remove("oculto");
+}
+
+// =============================
+// Mostrar resumen de transacciones
+// =============================
 function mostrarResumenTransacciones() {
-  const cuerpo = document.getElementById("cuerpoTablaTransacciones");
-  cuerpo.innerHTML = "";
-  if (transacciones.length === 0) {
-    cuerpo.innerHTML = `<tr><td colspan="5">No hay transacciones registradas.</td></tr>`;
+  const tabla = document.getElementById("cuerpoTablaTransacciones");
+  const seccion = document.getElementById("resumenTransacciones");
+
+  if (!tabla || !seccion) return console.warn("Falta el contenedor");
+
+  tabla.innerHTML = "";
+
+  if (!usuarioActual.transacciones || usuarioActual.transacciones.length === 0) {
+    tabla.innerHTML = `<tr><td colspan="5" style="text-align:center;">Sin movimientos registrados</td></tr>`;
+    seccion.classList.remove("oculto");
     return;
   }
-  transacciones.forEach(tx => {
+
+  usuarioActual.transacciones.forEach(tx => {
     const fila = document.createElement("tr");
     fila.innerHTML = `
       <td>${tx.fecha}</td>
       <td>${tx.referencia}</td>
       <td>${tx.tipo}</td>
       <td>${tx.descripcion}</td>
-      <td>$${tx.valor.toLocaleString()}</td>`;
-    cuerpo.appendChild(fila);
+      <td>$${Number(tx.valor).toLocaleString()}</td>
+    `;
+    tabla.appendChild(fila);
+  });
+
+  ocultarSecciones();
+  seccion.classList.remove("oculto");
+}
+
+// =============================
+// Auxiliares
+// =============================
+function generarNumeroCuenta() {
+  return Math.floor(1000000000 + Math.random() * 9000000000).toString();
+}
+
+function obtenerFechaHoy() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function mostrarDatosUsuario() {
+  nombreUsuarioElem.textContent = usuarioActual.nombre;
+  titularElem.textContent = usuarioActual.nombre;
+  cuentaNumeroElem.textContent = usuarioActual.numeroCuenta;
+  saldoElem.textContent = "$" + Number(usuarioActual.saldo || 0).toLocaleString();
+  fechaCreacionElem.textContent = usuarioActual.fechaCreacion;
+}
+
+function cerrarSesion() {
+  sessionStorage.removeItem("usuario");
+  window.location.href = "html1.html";
+}
+
+function generarReferencia() {
+  return "REF" + Math.floor(100000 + Math.random() * 900000);
+}
+
+// =============================
+// Menú hamburguesa
+// =============================
+const toggleBtn = document.getElementById("hamburguesa");
+const menuNav = document.getElementById("menu");
+
+if (toggleBtn && menuNav) {
+  toggleBtn.addEventListener("click", () => {
+    menuNav.classList.toggle("mostrar");
+  });
+
+  const botonesMenu = menuNav.querySelectorAll("button");
+  botonesMenu.forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (window.innerWidth <= 768) {
+        menuNav.classList.remove("mostrar");
+      }
+    });
   });
 }

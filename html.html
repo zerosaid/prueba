@@ -1,11 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">Add commentMore actions
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Banco Virtual</title>
   <link rel="stylesheet" href="style.css" />
+  <!-- Firebase App (base) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <!-- Firebase Realtime Database -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
 </head>
+
 <body>
   <header>
     <h2>Banco Virtual de Daniel</h2>
@@ -14,10 +21,14 @@
   <main>
     <h1>Bienvenido al Banco Virtual</h1>
 
+    <h2 id="nombre-usuario"></h2>
+
     <section id="resumen">
-      <p><strong>Número de cuenta:</strong> <span id="cuenta">---</span></p>
-      <p><strong>Saldo actual:</strong> $<span id="saldo">0</span></p>
-      <p><strong>Fecha de creación:</strong> <span id="fecha">---</span></p>
+      <p><strong>Titular:</strong> <span id="titular">---</span></p>
+      <p><strong>Número de cuenta:</strong> <span id="numero-cuenta">---</span></p>
+      <p><strong>Saldo actual:</strong> <span id="saldo">$0</span></p>
+      <p><strong>Fecha de creación:</strong> <span id="fecha-creacion">---</span></p>
+
     </section>
 
     <button id="hamburguesa" class="menu-toggle">☰</button>
@@ -47,23 +58,43 @@
     </section>
 
     <section id="retiro" class="contenido oculto">
-      <h2>Retiro de Dinero</h2>
-      <label for="montoRetiro">Cantidad a retirar:</label>
-      <input type="number" id="montoRetiro" min="0" step="500" required />
-      <button onclick="realizarRetiro()">Confirmar retiro</button>
+      <h2>Retiro de Efectivo</h2>
+      <p>Cuenta: <strong id="cuentaUsuarioRetiro">---</strong></p>
+      <p>Nombre: <strong id="nombreUsuarioRetiro">---</strong></p>
+      <input type="number" id="montoRetirar" placeholder="Monto a retirar" />
+      <button onclick="realizarRetiro()">Confirmar Retiro</button>
+    
+      <div id="resumenRetiro" class="oculto">
+        <p id="detalleRetiro"></p>
+      </div>
     </section>
+    
+    <section id="deposito" class="contenido oculto">
+      <h2>Depósito en Oficina</h2>
+      <p>Cuenta: <strong id="cuentaUsuarioDeposito">---</strong></p>
+      <p>Nombre: <strong id="nombreUsuarioDeposito">---</strong></p>
+      <input type="number" id="montoDepositar" placeholder="Monto a depositar" />
+      <button onclick="realizarDeposito()">Confirmar Depósito</button>
+    
+      <div id="resumenDeposito" class="contenido oculto">
+        <p id="detalleDeposito"></p>
+      </div>
+    </section>
+    
 
     <section id="contenido" class="contenido oculto">
       <!-- Aquí se insertará el formulario de depósito dinámicamente con innerHTML -->
     </section>
 
-    <section id="reporte" class="contenido oculto">
-      <h2>Reporte de Cuenta</h2>
-      <p><strong>Número:</strong> <span id="reporteCuenta"></span></p>
-      <p><strong>Saldo:</strong> $<span id="reporteSaldo"></span></p>
-      <p><strong>Fecha de creación:</strong> <span id="reporteFecha"></span></p>
-      <button onclick="window.print()">Imprimir reporte</button>
+    <section id="seccionReporte" class="contenido oculto">
+      <h2>Reporte del Usuario</h2>
+      <p><strong>Nombre:</strong> <span id="reporteNombre">---</span></p>
+      <p><strong>Cédula:</strong> <span id="reporteCedula">---</span></p>
+      <p><strong>Número de cuenta:</strong> <span id="reporteCuenta">---</span></p>
+      <p><strong>Fecha de creación:</strong> <span id="reporteFecha">---</span></p>
+      <p><strong>Saldo actual:</strong> <span id="reporteSaldo">---</span></p>
     </section>
+
 
     <section id="servicios" class="contenido oculto">
       <h2>Pago de Servicios Públicos</h2>
@@ -83,11 +114,12 @@
         <button onclick="window.print()">Imprimir resumen</button>
       </div>
     </section>
+    
 
     <section id="certificado" class="contenido oculto">
       <h2>Certificado Bancario</h2>
-      <p><strong>Banco:</strong> Banco Virtual de Daniel</p>
-      <p><strong>Titular:</strong> Daniel Santiago González Hernández</p>
+      <p><strong>Banco:</strong>Acme Bank</p>
+      <p><strong>Titular:</strong> <span id="titular"></span></p>
       <p><strong>Número de cuenta:</strong> <span id="certCuenta"></span></p>
       <p><strong>Saldo actual:</strong> $<span id="certSaldo"></span></p>
       <p><strong>Fecha de creación:</strong> <span id="certFecha"></span></p>
@@ -107,7 +139,9 @@
             <th>Valor</th>
           </tr>
         </thead>
-        <tbody id="cuerpoTablaTransacciones"></tbody>
+        <tbody id="cuerpoTablaTransacciones">
+          <!-- Las filas se generan aquí -->
+        </tbody>
       </table>
       <button onclick="window.print()">Imprimir resumen</button>
     </section>
@@ -118,11 +152,7 @@
       <p>¡Hasta pronto!</p>
     </section>
   </main>
-
   <script src="./Dashboard.js"></script>
 </body>
+
 </html>
-
-
-
-
